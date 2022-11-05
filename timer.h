@@ -1,4 +1,6 @@
-#pragma once
+#ifndef _TIMER_H_
+#define _TIMER_H_
+
 #include <stdint.h>
 
 // MAIN_DELAY in ms (X in ms) * 1000000 / 667
@@ -10,4 +12,4 @@ enum {MAIN_DELAY = 14992};
 
 void config_timer_a2(void);
 
-void delay_667mks(uint16_t n_x667mks);
+#endif
