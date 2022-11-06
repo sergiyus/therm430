@@ -3,28 +3,34 @@
  * The two digit 7 segment thermometer.
  * Original idea from http://www.technoblogy.com/show?2G8T
  *
- * Thu 03 Nov 2022 23:26:16 EET
+ * Sun 06 Nov 2022 20:44:28 EET
  *
- * Programming...
- * Writing  826 bytes at fc00 [section: .text]...
- * Writing   10 bytes at ff3a [section: .rodata]...
- * Writing   32 bytes at ffe0 [section: .vectors]...
- * Done, 868 bytes total*
+ * text    data     bss     dec     hex filename
+ * 1024       0      18    1042     412 therm430.elf
  */
 
 #include <msp430f2003.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "logic.h"
 #include "clocks.h"
 #include "ports.h"
 #include "timer.h"
 #include "sd16a.h"
 #include "7seg_lcd.h"
+#include "logic.h"
+
+bool nmi_flag = false;
 
 int main(void)
 {
-	WDTCTL = WDTPW + WDTHOLD;		// Stop watchdog timer.
+	/*
+	 * Stop watchdog timer and config nmi.
+	 * WDTNMI	- NMI select function.
+	 * WDTNMIES	- NMI on falling edge (1 -> 0).
+	 */
+	WDTCTL = WDTPW + WDTHOLD + WDTNMI + WDTNMIES;
+	/* Enable nmi interupt */
+	IE1 |= NMIIE;
 
 	config_clocks();
 	config_ports();
@@ -36,7 +42,7 @@ int main(void)
 	uint16_t loopcounter = DELAY_VOLTAGE_MEASURE;
 	struct dspl_two_digit dspl;
 
-	while(1) {
+	while (1) {
 		++loopcounter;
 		if (loopcounter > DELAY_VOLTAGE_MEASURE) {
 			start_measurement(VOLTAGE);
@@ -57,8 +63,29 @@ int main(void)
 			dspl.digit1 = L;
 			dspl.digit0 = b;
 			print_two_digit(dspl, SEG_TIME_ON);
-
 			delay_667mks(SEG_TIME_ON);
+		}
+
+		if (nmi_flag) {
+			nmi_flag = false;
+			start_measurement(VOLTAGE);
+			LPM3;
+
+			if (voltage_sd16a_result) {
+				voltage_sd16a_result = false;
+				uint16_t volt;
+				volt = simply_convert_voltage(voltage_raw);
+
+				dspl = convert_voltage_in_two_digit(volt);
+				/*
+				uint8_t d1 = volt / 10;
+				uint8_t d0 = volt % 10;
+				dspl.digit1 = SEVENSEG_OUTPUT[d1] + DP;
+				dspl.digit0 = SEVENSEG_OUTPUT[d0];
+				*/
+				print_two_digit(dspl, 10);
+			}
+
 		}
 
 		start_measurement(TEMPERATURE);
@@ -118,3 +145,16 @@ __interrupt void SD16ISR(void)
 
 	LPM3_EXIT;
 }
+
+
+#pragma vector = NMI_VECTOR
+__interrupt void NMI(void)
+{
+	if (NMIIFG) {
+		nmi_flag = true;
+		IFG1 &= ~NMIIFG;
+		IE1 |= NMIIE;
+		LPM3_EXIT;
+	}
+}
+

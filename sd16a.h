@@ -26,9 +26,8 @@ extern bool low_battery;
 void config_sd16a(void);
 void start_measurement(const uint8_t sd16a_channel);
 
-/*
-uint16_t convert_sd16a_raw_to_voltage(const uint16_t raw_data);
-*/
+/* uint16_t convert_sd16a_raw_to_voltage(const uint32_t raw_data); */
+uint16_t simply_convert_voltage(const uint16_t raw_data);
 
 int16_t convert_sd16a_raw_to_temperature(const uint16_t raw_data);
 

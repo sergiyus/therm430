@@ -14,7 +14,13 @@ enum {SEG_TIME_ON = 10};
 
 void delay_667mks(const uint16_t n_x667mks);
 
-struct dspl_two_digit convert_temp_in_two_digit(int16_t temp);
+struct dspl_two_digit convert_temp_in_two_digit(const int16_t temp);
+struct dspl_two_digit convert_voltage_in_two_digit(const uint16_t voltage);
+
+/*
+void convert_temp_in_two_digit(struct dspl_two_digit *dspl, const int16_t temp);
+void convert_voltage_in_two_digit(struct dspl_two_digit *dspl, const uint16_t voltage);
+*/
 
 void print_two_digit(const struct dspl_two_digit dspl,
 		     const uint16_t time_seg_on);
