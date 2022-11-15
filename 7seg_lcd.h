@@ -3,7 +3,6 @@
 
 #include <msp430f2003.h>
 #include <stdint.h>
-#include <stdbool.h>
 
 #define DIG0	BIT7
 #define	DIG1	BIT6
@@ -34,8 +33,8 @@ enum {
 	L	= seg_D + seg_E + seg_F,			/* L */
 	o	= seg_C + seg_D + seg_E + seg_G,		/* o */
 	b	= seg_C + seg_D + seg_E + seg_F + seg_G,	/* b */
-	E	= seg_A + seg_D + seg_E + seg_F + seg_G,	/* E */
-	r	= seg_E + seg_G					/* r */
+/*	E	= seg_A + seg_D + seg_E + seg_F + seg_G, */	/* E */
+/*	r	= seg_E + seg_G				 */	/* r */
 };
 
 #endif

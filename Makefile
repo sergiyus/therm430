@@ -4,7 +4,7 @@ CC=msp430-gcc
 SIZE=msp430-size
 CFLAGS=-mmcu=$(MCU) -DHARDWARE -ggdb -Os -std=c99 -Wall -Wextra -Werror #-Wsign-conversion
 LDFLAGS=-mmcu=$(MCU)
-OBJ=main.o ports.o clocks.o timer.o sd16a.o 7seg_lcd.o logic.o
+OBJ=main.o sd16a.o 7seg_lcd.o logic.o
 TARGET=therm430
 .PHONY: all clean
 
