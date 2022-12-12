@@ -13,12 +13,12 @@ struct dspl_two_digit {
 enum { SEG_TIME_ON = 10 };
 enum { MAIN_DELAY = 14992 };
 
-bool button_press;
-bool periodic_timer;
-bool check_battery;
-bool show_voltage;
-bool show_temp;
-bool show_periodic_temp;
+extern bool button_press;
+extern bool periodic_timer;
+extern bool check_battery;
+extern bool show_voltage;
+extern bool show_temp;
+extern bool show_periodic_temp;
 
 void delay_667mks(const uint16_t n_x667mks);
 

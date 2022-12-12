@@ -3,10 +3,10 @@
  * The two digit 7 segment thermometer.
  * Original idea from http://www.technoblogy.com/show?2G8T
  *
- * Tue 15 Nov 2022 11:10:33 EET
- * 
+ * Mon 12 Dec 2022 12:09:22 EET
+ *
  * text    data     bss     dec     hex filename
- * 1024       0      18    1042     412 therm430.elf
+ * 1022       2      26    1050     41a therm430.elf
 */
 
 #include <msp430f2003.h>
@@ -15,6 +15,12 @@
 #include "sd16a.h"
 #include "7seg_lcd.h"
 #include "logic.h"
+
+#define CONVERT_VOLTAGE(VOLTAGE_RAW)	((VOLTAGE_RAW) / 1000)
+#define CONVERT_TEMP(TEMP_RAW)		((int16_t)((TEMP_RAW) - 39768) / 144)
+
+volatile uint16_t voltage_raw = 0;
+volatile uint16_t temp_raw = 0;
 
 int main(void)
 {
@@ -28,6 +34,9 @@ int main(void)
 	IE1 |= NMIIE;
 
 	/* config_clocks(); */
+	//BCSCTL1 = CALBC1_1MHZ;
+	//DCOCTL = CALDCO_1MHZ;
+
 	if (CALBC1_1MHZ == 0xFF || CALDCO_1MHZ == 0xFF) {
 		// fDCO(7,3)DCO frequency (7, 3)
 		// RSELx = 7, DCOx = 3, MODx = 0
@@ -45,9 +54,12 @@ int main(void)
 	// All pins are output
 	P1SEL &= ~0xFF;
 	P1DIR |= 0xFF;
-
 	P2SEL &= ~(BIT7 + BIT6);
 	P2DIR |= BIT6 + BIT7;
+	//P2OUT &= ~(DIG1 + DIG0);
+	/* no output to 7 segment */
+	P2OUT = 0x00;
+
 
 	/* config_timer_a2(); */
 	// CCR0 - Interupt enable.
@@ -65,8 +77,8 @@ int main(void)
 	//TACCTL1 = CCIE;
 
 	/* config_sd16a(); */
-	// This is specific magic number for SD16_A only msp430f20x3
-	// msp430f20x3 rev. B only!! From errata SLA153I.pdf
+	// This is specific magic number for SD16_A
+	// msp430f20x3 rev. B only!!! From errata SLA153I.pdf
 	*(uint8_t *const)(0xBF) = 0x61;
 
 	// Clock source - used VLO (~12kHz)
@@ -77,10 +89,11 @@ int main(void)
 
 	// Unipolar, single mode and IE.
 	SD16CCTL0 = SD16UNI + SD16SNGL + SD16IE;
-	_BIS_SR(GIE);
 
-	uint16_t loopcounter = DELAY_VOLTAGE_MEASURE;
-	struct dspl_two_digit dspl;
+	uint16_t loopcounter = DELAY_VOLTAGE_MEASURE - 1;
+	struct dspl_two_digit dspl = {0, 0};
+
+	_BIS_SR(GIE);
 
 	while (1) {
 
@@ -108,7 +121,8 @@ int main(void)
 		} else if (show_voltage && voltage_sd16a_result) {
 			show_voltage = false;
 			voltage_sd16a_result = false;
-			uint16_t volt = voltage_raw / 1000;
+			uint16_t volt = CONVERT_VOLTAGE(voltage_raw);
+			//uint16_t volt = convert_voltage(voltage_raw);
 			dspl = convert_voltage_in_two_digit(volt);
 			print_two_digit(dspl, SEG_TIME_ON);
 
@@ -121,7 +135,7 @@ int main(void)
 				print_two_digit(dspl, SEG_TIME_ON);
 				delay_667mks(SEG_TIME_ON);
 			}
-			int16_t temp = (int16_t)(temp_raw - 39768) / 144;
+			int16_t temp = CONVERT_TEMP(temp_raw);
 			dspl = convert_temp_in_two_digit(temp);
 			print_two_digit(dspl, SEG_TIME_ON);
 		}
@@ -163,7 +177,7 @@ __interrupt void SD16ISR(void)
 		temp_raw = SD16MEM0;
 		temperature_sd16a_measure = false;
 		temperature_sd16a_result = true;
-	} else if (voltage_sd16a_measure == true) {
+	} else if (voltage_sd16a_measure) {
 		voltage_raw = SD16MEM0;
 		voltage_sd16a_measure = false;
 		voltage_sd16a_result = true;

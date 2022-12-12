@@ -3,6 +3,14 @@
 #include <stdbool.h>
 #include "sd16a.h"
 
+bool voltage_sd16a_measure = false;
+bool temperature_sd16a_measure = false;
+
+bool voltage_sd16a_result = false;
+bool temperature_sd16a_result = false;
+
+bool low_battery = false;
+
 void start_measurement(const uint8_t sd16a_channel)
 {
 	// Ref - On

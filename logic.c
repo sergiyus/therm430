@@ -1,5 +1,13 @@
 #include "logic.h"
 
+bool button_press = false;
+bool periodic_timer = true;
+bool check_battery = false;
+bool show_voltage = false;
+bool show_temp = false;
+bool show_periodic_temp = false;
+
+
 struct dspl_two_digit convert_temp_in_two_digit(const int16_t temperature)
 {
 	struct dspl_two_digit dspl;
@@ -17,7 +25,7 @@ struct dspl_two_digit convert_temp_in_two_digit(const int16_t temperature)
 			dspl.digit1 = MINUS;
 			temp = ~temp + 1;
 		}
-		uint8_t d = temp / 10;
+		uint16_t d = temp / 10;
 		if (d > 0) {
 			dspl.digit1 += SEVENSEG_OUTPUT[d];
 		}
@@ -30,7 +38,7 @@ struct dspl_two_digit convert_temp_in_two_digit(const int16_t temperature)
 struct dspl_two_digit convert_voltage_in_two_digit(const uint16_t voltage)
 {
 	struct dspl_two_digit dspl;
-	uint8_t d;
+	uint16_t d;
 	d = voltage / 10;
 	dspl.digit1 = SEVENSEG_OUTPUT[d] + DP;
 	d = voltage % 10;
@@ -42,10 +50,10 @@ void print_two_digit(const struct dspl_two_digit dspl,
 		     const uint16_t time_seg_on)
 {
 	/* time for output = loop * 2* (0.667ms * time_seg_on)	*/
-	/* time = 10 * 2 * 6.67 ~= 0.133 sec			*/
+	/* time = 20 * 2 * 6.67 ~= 0.266 sec			*/
 	enum { loop = 20 };
 
-	for (uint16_t i = 0; i < loop; ++i) {
+	for (uint16_t i = loop; i > 0; --i) {
 		P1OUT = dspl.digit1;
 		P2OUT = DIG1;
 		delay_667mks(time_seg_on);
