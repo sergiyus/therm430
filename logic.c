@@ -1,11 +1,11 @@
 #include "logic.h"
 
-bool button_press = false;
+bool button_press;
 bool periodic_timer = true;
-bool check_battery = false;
-bool show_voltage = false;
-bool show_temp = false;
-bool show_periodic_temp = false;
+bool check_battery;
+bool show_voltage;
+bool show_temp;
+bool show_periodic_temp;
 
 
 struct dspl_two_digit convert_temp_in_two_digit(const int16_t temperature)
@@ -25,7 +25,9 @@ struct dspl_two_digit convert_temp_in_two_digit(const int16_t temperature)
 			dspl.digit1 = MINUS;
 			temp = ~temp + 1;
 		}
-		uint16_t d = temp / 10;
+		uint16_t d;
+
+		d = temp / 10;
 		if (d > 0) {
 			dspl.digit1 += SEVENSEG_OUTPUT[d];
 		}
@@ -39,6 +41,7 @@ struct dspl_two_digit convert_voltage_in_two_digit(const uint16_t voltage)
 {
 	struct dspl_two_digit dspl;
 	uint16_t d;
+
 	d = voltage / 10;
 	dspl.digit1 = SEVENSEG_OUTPUT[d] + DP;
 	d = voltage % 10;

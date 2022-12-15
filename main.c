@@ -3,11 +3,11 @@
  * The two digit 7 segment thermometer.
  * Original idea from http://www.technoblogy.com/show?2G8T
  *
- * Mon 12 Dec 2022 12:09:22 EET
+ * Thu 15 Dec 2022 23:33:52 EET
  *
  * text    data     bss     dec     hex filename
- * 1022       2      26    1050     41a therm430.elf
-*/
+ * 1020       2      26    1048     418 therm430.elf
+ */
 
 #include <msp430f2003.h>
 #include <stdint.h>
@@ -19,8 +19,8 @@
 #define CONVERT_VOLTAGE(VOLTAGE_RAW)	((VOLTAGE_RAW) / 1000)
 #define CONVERT_TEMP(TEMP_RAW)		((int16_t)((TEMP_RAW) - 39768) / 144)
 
-volatile uint16_t voltage_raw = 0;
-volatile uint16_t temp_raw = 0;
+volatile uint16_t voltage_raw;
+volatile uint16_t temp_raw;
 
 int main(void)
 {
@@ -51,13 +51,19 @@ int main(void)
 	BCSCTL3 |= LFXT1S_2;
 
 	/* config_ports(); */
-	// All pins are output
-	P1SEL &= ~0xFF;
-	P1DIR |= 0xFF;
-	P2SEL &= ~(BIT7 + BIT6);
-	P2DIR |= BIT6 + BIT7;
+	// All pins of P1 are output
+	P1SEL = 0x00;
+	P1DIR = 0xFF;
+
+	// P2.7 & P2.6 are output
+	// NO FREE space!
+	//P2SEL &= ~(BIT7 + BIT6);
+	P2SEL = 0x00;
+	//P2DIR |= BIT6 + BIT7;
+	P2DIR = 0xFF;
+
+	/* clear digig */
 	//P2OUT &= ~(DIG1 + DIG0);
-	/* no output to 7 segment */
 	P2OUT = 0x00;
 
 
@@ -136,6 +142,7 @@ int main(void)
 				delay_667mks(SEG_TIME_ON);
 			}
 			int16_t temp = CONVERT_TEMP(temp_raw);
+
 			dspl = convert_temp_in_two_digit(temp);
 			print_two_digit(dspl, SEG_TIME_ON);
 		}
@@ -155,16 +162,16 @@ __interrupt void Timer_A0(void)
 #pragma vector = TIMERA1_VECTOR
 __interrupt void Timer_A1(void)
 {
-	switch(TAIV) {
+	switch (TAIV) {
 	case  2:
-	         {
-			// disable interupt
-			TACCTL1 &= ~CCIE;
-	         	LPM3_EXIT;
-	         }
-	         break;
-	case  4: break;
-	case 10: break;
+		// disable interupt
+		TACCTL1 &= ~CCIE;
+		LPM3_EXIT;
+		break;
+	case  4:
+		break;
+	case 10:
+		break;
 	}
 }
 
@@ -188,7 +195,7 @@ __interrupt void SD16ISR(void)
 #pragma vector = NMI_VECTOR
 __interrupt void NMI(void)
 {
-	if (NMIIFG) {
+	if (IFG1 & NMIIFG) {
 		button_press = true;
 		IFG1 &= ~NMIIFG;
 		IE1 |= NMIIE;
