@@ -1,29 +1,22 @@
 therm430
-Thu 15 Sep 2022 11:56:44 EEST
-
-Формальний опис присторою:
-двоцифровий семисегментний термометр на MSP430F2003 + 2 digit 7 segment LED.
+Two-digit seven-segment thermometer on MSP430F2003 + 2 digit 7 segment LED.
 original idea from http://www.technoblogy.com/show?2G8T
 
-Діапазон вимірюваної температури: від -19C до +99С.
+The range of measured temperature: from -19C to +99C.
 
-Індикація температури
-	в діапазоні від	< -19C 	    - lo
-			-19C...-10С - двоцифрове десяткове з "-" в старшому розряді
-			-9С...-1С   - старший розряд "-", молодший десяткове число
-			0С 	    - страший розряд не заповнений, молодший 0
-			+1С до +9С  - з десятковою точністю,
-			+10С до 99С - двоцифрове десяткове число,
-			> 99C 	    - hi
-Індикація розряду елемента живлення - lb
+Temperature display in the range from < -19C 		- lo
+					-19C...-10C 	- two-digit decimal with "-" in the upper digit
+					-9С...-1С	- senior digit "-", junior decimal number
+					 0С 		- the highest digit is not filled, the lowest is 0
+					+1С to +9С 	- the highest digit is not filled,
+					+10C to 99C 	- a two-digit decimal number,
+					> 99C 		- hi
+Indication of battery discharge - lb.
 
-Формат роботи
-Виводимо крапку в молодшому розряді (або розряд елемента живлення lb) на t = 200мс,
-потім виводимо значення температури на t = 200мс, після чого переходимо в режим
-пониженого енергоспоживання на t = 10сек.
+Work format
+Temperature indication ~ 200ms, once every ~ 10 seconds.
+If the voltage of the power element is lower than 2.2V - before displaying the temperature - indicate lb.
 
-**(для реалізації даниї функцій бракує ресурсів MSP430F2003)
-Натиснення на кнопку - індикує напругу елемента живлення в форматі (3.0),
-повторне натиснення - індикує мінімальну температуру за весь період вимірювання,
-наступне натиснення - індикує максимальну виміряну температуру.
+An internal temperature sensor and an ADC are used to measure the temperature (it is not very accurate).
 
+The code was compiled using the compiler from energia.nu with the -Os optimization flag.
