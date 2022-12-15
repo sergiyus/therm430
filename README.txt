@@ -1,6 +1,6 @@
 therm430
 Two-digit seven-segment thermometer on MSP430F2003 + 2 digit 7 segment LED.
-original idea from http://www.technoblogy.com/show?2G8T
+Original idea from http://www.technoblogy.com/show?2G8T
 
 The range of measured temperature: from -19C to +99C.
 
