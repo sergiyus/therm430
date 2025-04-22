@@ -1,4 +1,4 @@
-#include <msp430f2003.h>
+#include <msp430.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "sd16a.h"

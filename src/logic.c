@@ -7,11 +7,9 @@ bool show_voltage;
 bool show_temp;
 bool show_periodic_temp;
 
-
-struct dspl_two_digit convert_temp_in_two_digit(const int16_t temperature)
+struct dspl_two_digit convert_temp_in_two_digit(int16_t temp)
 {
 	struct dspl_two_digit dspl;
-	int16_t temp = temperature;
 
 	if (temp > HIGHT_TEMP) {
 		dspl.digit1 = H;
@@ -23,15 +21,15 @@ struct dspl_two_digit convert_temp_in_two_digit(const int16_t temperature)
 		dspl.digit1 = 0;
 		if (temp < 0) {
 			dspl.digit1 = MINUS;
-			temp = ~temp + 1;
+            temp = -temp;
 		}
 		uint16_t d;
 
-		d = temp / 10;
+		d = (uint16_t)temp / 10;
 		if (d > 0) {
-			dspl.digit1 += SEVENSEG_OUTPUT[d];
+			dspl.digit1 |= SEVENSEG_OUTPUT[d];
 		}
-		d = temp % 10;
+		d = (uint16_t)temp % 10;
 		dspl.digit0 = SEVENSEG_OUTPUT[d];
 	}
 	return dspl;
@@ -43,7 +41,7 @@ struct dspl_two_digit convert_voltage_in_two_digit(const uint16_t voltage)
 	uint16_t d;
 
 	d = voltage / 10;
-	dspl.digit1 = SEVENSEG_OUTPUT[d] + DP;
+	dspl.digit1 = SEVENSEG_OUTPUT[d] | DP;
 	d = voltage % 10;
 	dspl.digit0 = SEVENSEG_OUTPUT[d];
 	return dspl;
@@ -56,7 +54,7 @@ void print_two_digit(const struct dspl_two_digit dspl,
 	/* time = 20 * 2 * 6.67 ~= 0.266 sec			*/
 	enum { loop = 20 };
 
-	for (uint16_t i = loop; i > 0; --i) {
+	for (uint16_t t = loop; t > 0; --t) {
 		P1OUT = dspl.digit1;
 		P2OUT = DIG1;
 		delay_667mks(time_seg_on);

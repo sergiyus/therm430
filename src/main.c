@@ -3,13 +3,16 @@
  * The two digit 7 segment thermometer.
  * Original idea from http://www.technoblogy.com/show?2G8T
  *
- * Thu 15 Dec 2022 23:33:52 EET
- *
+ * Tue 22 Apr 2025 13:04:45 EEST
+ * gcc:
  * text    data     bss     dec     hex filename
- * 1020       2      26    1048     418 therm430.elf
+ * 1076       2      20    1098     44a bin/therm430.elf
+ * energia:
+ * text    data     bss     dec     hex filename
+ * 1020       2      18    1040     410 bin/therm430.elf
  */
 
-#include <msp430f2003.h>
+#include <msp430.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "sd16a.h"
@@ -17,7 +20,7 @@
 #include "logic.h"
 
 #define CONVERT_VOLTAGE(VOLTAGE_RAW)	((VOLTAGE_RAW) / 1000)
-#define CONVERT_TEMP(TEMP_RAW)		((int16_t)((TEMP_RAW) - 39768) / 144)
+#define CONVERT_TEMP(TEMP_RAW)		    ((int16_t)((TEMP_RAW) - 39768) / 144)
 
 volatile uint16_t voltage_raw;
 volatile uint16_t temp_raw;
@@ -151,21 +154,35 @@ int main(void)
 	}
 }
 
-#pragma vector = TIMERA0_VECTOR
-__interrupt void Timer_A0(void)
+#if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
+#pragma vector = TIMER0_A0_VECTOR
+__interrupt
+#elif defined(__GNUC__)
+__attribute__ ((interrupt(TIMER0_A0_VECTOR)))
+#else
+#error Compiler not supported!
+#endif
+void Timer_A0(void)
 {
 	TACCR1 = 0;
 	periodic_timer = true;
 	LPM3_EXIT;
 }
 
-#pragma vector = TIMERA1_VECTOR
-__interrupt void Timer_A1(void)
+#if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
+#pragma vector = TIMER_A1_VECTOR
+__interrupt
+#elif defined(__GNUC__)
+__attribute__ ((interrupt(TIMER0_A1_VECTOR)))
+#else
+#error Compiler not supported!
+#endif
+void Timer_A1(void)
 {
 	switch (TAIV) {
 	case  2:
 		// disable interupt
-		TACCTL1 &= ~CCIE;
+		TACCTL1 &= (uint16_t) ~CCIE;
 		LPM3_EXIT;
 		break;
 	case  4:
@@ -175,11 +192,18 @@ __interrupt void Timer_A1(void)
 	}
 }
 
+#if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
 #pragma vector = SD16_VECTOR
-__interrupt void SD16ISR(void)
+__interrupt
+#elif defined(__GNUC__)
+__attribute__ ((interrupt(SD16_VECTOR)))
+#else
+#error Compiler not supported!
+#endif
+void SD16ISR(void)
 {
 	/* Ref - OFF, for power safe */
-	SD16CTL &= ~SD16REFON;
+	SD16CTL &= (uint16_t) ~SD16REFON;
 	if (temperature_sd16a_measure) {
 		temp_raw = SD16MEM0;
 		temperature_sd16a_measure = false;
@@ -192,12 +216,19 @@ __interrupt void SD16ISR(void)
 	LPM3_EXIT;
 }
 
+#if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
 #pragma vector = NMI_VECTOR
-__interrupt void NMI(void)
+__interrupt
+#elif defined(__GNUC__)
+__attribute__ ((interrupt(NMI_VECTOR)))
+#else
+#error Compiler not supported!
+#endif
+void NMI(void)
 {
 	if (IFG1 & NMIIFG) {
 		button_press = true;
-		IFG1 &= ~NMIIFG;
+		IFG1 &= (uint8_t) ~NMIIFG;
 		IE1 |= NMIIE;
 		LPM3_EXIT;
 	}
