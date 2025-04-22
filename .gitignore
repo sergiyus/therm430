@@ -1,0 +1,17 @@
+# .gitignore
+
+# ignore all .vim and .nvim
+*.vim
+*.nvim
+
+# ignore build directories
+bin
+build
+
+# ignore ctags files
+tags
+
+# ignore log files and directories
+.log
+Log
+Log/*
