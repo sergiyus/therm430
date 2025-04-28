@@ -1,3 +1,5 @@
+#include <msp430.h>
+#include <stdint.h>
 #include "7seg_lcd.h"
 
 /* 7-seg LED display from "0" to "9". */

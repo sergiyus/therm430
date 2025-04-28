@@ -1,9 +1,6 @@
 #ifndef _7SEG_LCD_H_
 #define _7SEG_LCD_H_
 
-#include <msp430.h>
-#include <stdint.h>
-
 #define DIG0	BIT7
 #define	DIG1	BIT6
 

@@ -31,6 +31,7 @@ Original idea from [Technoblogy](http://www.technoblogy.com/show?2G8T).
 
 *   An internal temperature sensor and an ADC are used to measure the temperature (note that the accuracy is limited).
 *   **Button for Power Source Voltage Indication**: A button is included in the project to indicate the power source voltage. When pressed, it displays the voltage level of the power supply, providing an easy way to monitor the system's power status.
+*   **New Option**: On the first press, the system displays the voltage level of the power supply. On the next press, it shows the current temperature. This alternates with each subsequent press, allowing for easy monitoring of both parameters.
 
 ## Important Note on Temperature Range
 

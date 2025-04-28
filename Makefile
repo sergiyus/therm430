@@ -3,11 +3,11 @@
 MCU         := msp430f2013
 TARGET      := therm430
 # MODE: debug or release
-MODE        :=
+MODE        := release
 # COMPILER: energia or gcc
 COMPILER    := gcc
 # Choose the MSP430 Debug Probe: eZ430 or eZ-FET
-DBG_PROBE   := eZ-FET
+DBG_PROBE   := eZ430
 
 ###############################################################################
 # Toolchain
@@ -116,10 +116,12 @@ endif
 CFLAGS  := -mmcu=$(MCU) $(WFLAGS) $(OFLAGS)
 
 ifeq ($(COMPILER), energia)
+WFLAGS  += -bool-compare
 CFLAGS	+= -I$(INC_DIR) -MMD -MP
 LDFLAGS	:= -mmcu=$(MCU)
 
 else ifeq ($(COMPILER), gcc)
+WFLAGS  += -Wbool-compare
 CFLAGS  += $(addprefix -I, $(INCLUDE_DIRS)) -I$(INC_DIR) -MMD -MP
 
 LDFLAGS := -mmcu=$(MCU) $(addprefix -L, $(LIB_DIRS))
